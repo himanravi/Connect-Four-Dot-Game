@@ -6,7 +6,7 @@ class ConnectFour {
         this.currentPlayer = 1;
         this.gameActive = true;
         this.lastMove = null;
-        this.isComputerMode = true; // Enable computer player by default
+        this.isComputerMode = true;
         this.isComputerTurn = false;
 
         console.log('Initializing Connect Four game');
@@ -24,7 +24,6 @@ class ConnectFour {
         boardElement.innerHTML = '';
         console.log('Creating board cells');
 
-        // Create cells from top to bottom
         for (let row = 0; row < this.ROWS; row++) {
             for (let col = 0; col < this.COLS; col++) {
                 const cell = document.createElement('div');
@@ -55,9 +54,14 @@ class ConnectFour {
 
             const cell = e.target;
             if (cell.classList.contains('cell')) {
+                const row = parseInt(cell.dataset.row);
                 const col = parseInt(cell.dataset.col);
-                console.log(`Clicked column: ${col}`);
-                this.makeMove(col);
+                console.log(`Clicked cell at row: ${row}, column: ${col}`);
+
+                // Check if the cell is empty
+                if (this.board[row][col] === 0) {
+                    this.makeMove(row, col);
+                }
             }
         });
 
@@ -80,17 +84,10 @@ class ConnectFour {
         }
     }
 
-    makeMove(col) {
-        console.log(`Attempting move in column ${col}`);
-        const row = this.getLowestEmptyRow(col);
-        if (row === null) {
-            console.log('Column is full');
-            return;
-        }
-
-        console.log(`Placing piece at row ${row}, column ${col}`);
+    makeMove(row, col) {
+        console.log(`Making move at row ${row}, column ${col}`);
         this.board[row][col] = this.currentPlayer;
-        this.animateDrop(row, col);
+        this.placePiece(row, col);
 
         if (this.checkWin(row, col)) {
             console.log(`Player ${this.currentPlayer} wins!`);
@@ -102,10 +99,9 @@ class ConnectFour {
             this.currentPlayer = this.currentPlayer === 1 ? 2 : 1;
             this.updateStatus();
 
-            // If it's computer's turn, make a move after a short delay
             if (this.isComputerMode && this.currentPlayer === 2 && this.gameActive) {
                 this.isComputerTurn = true;
-                setTimeout(() => this.makeComputerMove(), 1000);
+                setTimeout(() => this.makeComputerMove(), 500);
             }
         }
     }
@@ -113,37 +109,31 @@ class ConnectFour {
     makeComputerMove() {
         if (!this.gameActive) return;
 
-        // Get all valid columns (not full)
-        const validColumns = Array.from({length: this.COLS}, (_, i) => i)
-            .filter(col => this.getLowestEmptyRow(col) !== null);
+        // Find all empty cells
+        const emptyCells = [];
+        for (let row = 0; row < this.ROWS; row++) {
+            for (let col = 0; col < this.COLS; col++) {
+                if (this.board[row][col] === 0) {
+                    emptyCells.push([row, col]);
+                }
+            }
+        }
 
-        if (validColumns.length === 0) return;
+        if (emptyCells.length === 0) return;
 
-        // Pick a random valid column
-        const randomCol = validColumns[Math.floor(Math.random() * validColumns.length)];
+        // Pick a random empty cell
+        const [row, col] = emptyCells[Math.floor(Math.random() * emptyCells.length)];
         this.isComputerTurn = false;
-        this.makeMove(randomCol);
+        this.makeMove(row, col);
     }
 
-    getLowestEmptyRow(col) {
-        for (let row = this.ROWS - 1; row >= 0; row--) {
-            if (this.board[row][col] === 0) return row;
-        }
-        return null;
+    placePiece(row, col) {
+        const cell = this.getCellElement(row, col);
+        cell.classList.add(`player${this.currentPlayer}`);
     }
 
     getCellElement(row, col) {
         return document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
-    }
-
-    animateDrop(row, col) {
-        const cell = this.getCellElement(row, col);
-        cell.classList.add('dropping');
-        cell.classList.add(`player${this.currentPlayer}`);
-
-        setTimeout(() => {
-            cell.classList.remove('dropping');
-        }, 500);
     }
 
     checkWin(row, col) {
@@ -210,13 +200,15 @@ class ConnectFour {
     }
 
     checkDraw() {
-        return this.board[0].every(cell => cell !== 0);
+        return this.board.every(row => row.every(cell => cell !== 0));
     }
 
     handleWin() {
         this.gameActive = false;
         const modal = new bootstrap.Modal(document.getElementById('victoryModal'));
-        const message = this.currentPlayer === 1 ? "You win!" : "Computer wins!";
+        const message = this.currentPlayer === 1 ? 
+            "🎉 Congratulations! You've won! 🏆" : 
+            "🤖 The Computer wins this round! 🎮";
         document.getElementById('victory-message').textContent = message;
         modal.show();
     }
@@ -224,7 +216,7 @@ class ConnectFour {
     handleDraw() {
         this.gameActive = false;
         const modal = new bootstrap.Modal(document.getElementById('victoryModal'));
-        document.getElementById('victory-message').textContent = "It's a draw!";
+        document.getElementById('victory-message').textContent = "🤝 It's a draw! Great game! 🎮";
         modal.show();
     }
 
