@@ -16,10 +16,12 @@
     position: relative;
     cursor: pointer;
     transition: background-color 0.3s ease;
+    min-height: 50px; /* Ensure minimum size */
 }
 
 .cell:hover {
     background: var(--bs-secondary-bg);
+    transform: scale(1.05);
 }
 
 .cell.player1 {
@@ -55,4 +57,20 @@
         gap: 4px;
         padding: 8px;
     }
+
+    .cell {
+        min-height: 40px;
+    }
+}
+
+/* Improve visibility of game status */
+.game-status {
+    padding: 1rem;
+    background: var(--bs-dark);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.controls {
+    margin-top: 2rem;
 }

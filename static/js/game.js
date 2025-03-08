@@ -7,13 +7,20 @@ class ConnectFour {
         this.gameActive = true;
         this.lastMove = null;
 
+        console.log('Initializing Connect Four game');
         this.initializeBoard();
         this.setupEventListeners();
     }
 
     initializeBoard() {
         const boardElement = document.getElementById('board');
+        if (!boardElement) {
+            console.error('Board element not found');
+            return;
+        }
+
         boardElement.innerHTML = '';
+        console.log('Creating board cells');
 
         for (let row = 0; row < this.ROWS; row++) {
             for (let col = 0; col < this.COLS; col++) {
@@ -24,36 +31,69 @@ class ConnectFour {
                 boardElement.appendChild(cell);
             }
         }
+        console.log('Board initialization complete');
     }
 
     setupEventListeners() {
-        document.getElementById('board').addEventListener('click', (e) => {
-            if (!this.gameActive) return;
+        const boardElement = document.getElementById('board');
+        if (!boardElement) {
+            console.error('Board element not found for event listeners');
+            return;
+        }
+
+        console.log('Setting up event listeners');
+
+        boardElement.addEventListener('click', (e) => {
+            console.log('Click detected on board');
+            if (!this.gameActive) {
+                console.log('Game is not active');
+                return;
+            }
+
             const cell = e.target;
             if (cell.classList.contains('cell')) {
+                console.log(`Clicked column: ${cell.dataset.col}`);
                 const col = parseInt(cell.dataset.col);
                 this.makeMove(col);
             }
         });
 
-        document.getElementById('reset-button').addEventListener('click', () => this.resetGame());
-        document.getElementById('new-game-modal').addEventListener('click', () => {
-            this.resetGame();
-            const modal = bootstrap.Modal.getInstance(document.getElementById('victoryModal'));
-            modal.hide();
-        });
+        const resetButton = document.getElementById('reset-button');
+        if (resetButton) {
+            resetButton.addEventListener('click', () => {
+                console.log('Reset button clicked');
+                this.resetGame();
+            });
+        }
+
+        const newGameModal = document.getElementById('new-game-modal');
+        if (newGameModal) {
+            newGameModal.addEventListener('click', () => {
+                console.log('New game button clicked in modal');
+                this.resetGame();
+                const modal = bootstrap.Modal.getInstance(document.getElementById('victoryModal'));
+                if (modal) modal.hide();
+            });
+        }
     }
 
     makeMove(col) {
+        console.log(`Attempting move in column ${col}`);
         const row = this.getLowestEmptyRow(col);
-        if (row === null) return;
+        if (row === null) {
+            console.log('Column is full');
+            return;
+        }
 
+        console.log(`Placing piece at row ${row}, column ${col}`);
         this.board[row][col] = this.currentPlayer;
         this.animateDrop(row, col);
 
         if (this.checkWin(row, col)) {
+            console.log(`Player ${this.currentPlayer} wins!`);
             this.handleWin();
         } else if (this.checkDraw()) {
+            console.log('Game is a draw');
             this.handleDraw();
         } else {
             this.currentPlayer = this.currentPlayer === 1 ? 2 : 1;
@@ -72,7 +112,7 @@ class ConnectFour {
         const cell = this.getCellElement(row, col);
         cell.classList.add('dropping');
         cell.classList.add(`player${this.currentPlayer}`);
-        
+
         setTimeout(() => {
             cell.classList.remove('dropping');
         }, 500);
@@ -94,7 +134,7 @@ class ConnectFour {
             let count = 1;
             count += this.countDirection(row, col, dir1[0], dir1[1]);
             count += this.countDirection(row, col, dir2[0], dir2[1]);
-            
+
             if (count >= 4) {
                 this.highlightWinningCells(row, col, dir1, dir2);
                 return true;
@@ -123,7 +163,7 @@ class ConnectFour {
 
     highlightWinningCells(row, col, dir1, dir2) {
         const winningCells = [[row, col]];
-        
+
         // Check in both directions
         [dir1, dir2].forEach(([deltaRow, deltaCol]) => {
             let currentRow = row + deltaRow;
@@ -184,5 +224,6 @@ class ConnectFour {
 
 // Initialize the game when the DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    new ConnectFour();
+    console.log('DOM loaded, initializing game');
+    window.game = new ConnectFour();
 });
