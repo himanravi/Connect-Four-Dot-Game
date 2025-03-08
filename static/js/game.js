@@ -24,6 +24,7 @@ class ConnectFour {
         boardElement.innerHTML = '';
         console.log('Creating board cells');
 
+        // Create cells from top to bottom
         for (let row = 0; row < this.ROWS; row++) {
             for (let col = 0; col < this.COLS; col++) {
                 const cell = document.createElement('div');
@@ -54,8 +55,8 @@ class ConnectFour {
 
             const cell = e.target;
             if (cell.classList.contains('cell')) {
-                console.log(`Clicked column: ${cell.dataset.col}`);
                 const col = parseInt(cell.dataset.col);
+                console.log(`Clicked column: ${col}`);
                 this.makeMove(col);
             }
         });
@@ -131,6 +132,10 @@ class ConnectFour {
         return null;
     }
 
+    getCellElement(row, col) {
+        return document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
+    }
+
     animateDrop(row, col) {
         const cell = this.getCellElement(row, col);
         cell.classList.add('dropping');
@@ -139,10 +144,6 @@ class ConnectFour {
         setTimeout(() => {
             cell.classList.remove('dropping');
         }, 500);
-    }
-
-    getCellElement(row, col) {
-        return document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
     }
 
     checkWin(row, col) {
