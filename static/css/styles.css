@@ -1,0 +1,58 @@
+.board {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    background: var(--bs-dark);
+    padding: 16px;
+    border-radius: 8px;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.cell {
+    aspect-ratio: 1;
+    background: var(--bs-secondary);
+    border-radius: 50%;
+    position: relative;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.cell:hover {
+    background: var(--bs-secondary-bg);
+}
+
+.cell.player1 {
+    background: var(--bs-danger);
+}
+
+.cell.player2 {
+    background: var(--bs-warning);
+}
+
+.cell.winner {
+    animation: pulse 1s infinite;
+}
+
+.cell.dropping {
+    animation: drop 0.5s ease-in;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+@keyframes drop {
+    0% { transform: translateY(-300%); }
+    100% { transform: translateY(0); }
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+    .board {
+        gap: 4px;
+        padding: 8px;
+    }
+}
