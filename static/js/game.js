@@ -6,6 +6,8 @@ class ConnectFour {
         this.currentPlayer = 1;
         this.gameActive = true;
         this.lastMove = null;
+        this.isComputerMode = true; // Enable computer player by default
+        this.isComputerTurn = false;
 
         console.log('Initializing Connect Four game');
         this.initializeBoard();
@@ -45,8 +47,8 @@ class ConnectFour {
 
         boardElement.addEventListener('click', (e) => {
             console.log('Click detected on board');
-            if (!this.gameActive) {
-                console.log('Game is not active');
+            if (!this.gameActive || this.isComputerTurn) {
+                console.log('Game is not active or computer is thinking');
                 return;
             }
 
@@ -98,7 +100,28 @@ class ConnectFour {
         } else {
             this.currentPlayer = this.currentPlayer === 1 ? 2 : 1;
             this.updateStatus();
+
+            // If it's computer's turn, make a move after a short delay
+            if (this.isComputerMode && this.currentPlayer === 2 && this.gameActive) {
+                this.isComputerTurn = true;
+                setTimeout(() => this.makeComputerMove(), 1000);
+            }
         }
+    }
+
+    makeComputerMove() {
+        if (!this.gameActive) return;
+
+        // Get all valid columns (not full)
+        const validColumns = Array.from({length: this.COLS}, (_, i) => i)
+            .filter(col => this.getLowestEmptyRow(col) !== null);
+
+        if (validColumns.length === 0) return;
+
+        // Pick a random valid column
+        const randomCol = validColumns[Math.floor(Math.random() * validColumns.length)];
+        this.isComputerTurn = false;
+        this.makeMove(randomCol);
     }
 
     getLowestEmptyRow(col) {
@@ -192,7 +215,8 @@ class ConnectFour {
     handleWin() {
         this.gameActive = false;
         const modal = new bootstrap.Modal(document.getElementById('victoryModal'));
-        document.getElementById('victory-message').textContent = `Player ${this.currentPlayer} wins!`;
+        const message = this.currentPlayer === 1 ? "You win!" : "Computer wins!";
+        document.getElementById('victory-message').textContent = message;
         modal.show();
     }
 
@@ -204,7 +228,8 @@ class ConnectFour {
     }
 
     updateStatus() {
-        document.getElementById('current-player').textContent = this.currentPlayer;
+        const statusText = this.currentPlayer === 1 ? "Your Turn" : "Computer's Turn";
+        document.getElementById('current-player').textContent = statusText;
     }
 
     resetGame() {
@@ -212,6 +237,7 @@ class ConnectFour {
         this.currentPlayer = 1;
         this.gameActive = true;
         this.lastMove = null;
+        this.isComputerTurn = false;
 
         // Reset UI
         const cells = document.querySelectorAll('.cell');
